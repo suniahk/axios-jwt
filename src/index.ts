@@ -1,5 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import { AxiosInstance, AxiosRequestConfig } from 'axios'
+import StorageMethod from './StorageMethod'
 
 // a little time before expiration to try refresh (seconds)
 const EXPIRE_FUDGE = 10
@@ -26,7 +27,7 @@ export const isLoggedIn = (): boolean => {
  * Sets the access and refresh tokens
  * @param {IAuthTokens} tokens - Access and Refresh tokens
  */
-export const setAuthTokens = (tokens: IAuthTokens): void => localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens))
+export const setAuthTokens = (tokens: IAuthTokens): void => StorageMethod.setItem(STORAGE_KEY, JSON.stringify(tokens))
 
 /**
  * Sets the access token
@@ -45,7 +46,7 @@ export const setAccessToken = (token: Token): void => {
 /**
  * Clears both tokens
  */
-export const clearAuthTokens = (): void => localStorage.removeItem(STORAGE_KEY)
+export const clearAuthTokens = (): void => StorageMethod.removeItem(STORAGE_KEY)
 
 /**
  * Returns the stored refresh token
@@ -112,7 +113,7 @@ export const useAuthTokenInterceptor = applyAuthTokenInterceptor
  * @returns {IAuthTokens} Object containing refresh and access tokens
  */
 const getAuthTokens = (): IAuthTokens | undefined => {
-  const rawTokens = localStorage.getItem(STORAGE_KEY)
+  const rawTokens = StorageMethod.getItem(STORAGE_KEY)
   if (!rawTokens) return
 
   try {
@@ -191,7 +192,7 @@ const refreshToken = async (requestRefresh: TokenRefreshRequest): Promise<Token>
     const status = error?.response?.status
     if (status === 401 || status === 422) {
       // The refresh token is invalid so remove the stored tokens
-      localStorage.removeItem(STORAGE_KEY)
+      StorageMethod.removeItem(STORAGE_KEY)
       throw new Error(`Got ${status} on token refresh; clearing both auth tokens`)
     } else {
       // A different error, probably network error
